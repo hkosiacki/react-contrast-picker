@@ -1,0 +1,60 @@
+{
+  "name": "react-contrast-picker",
+  "version": "0.1.0",
+  "description": "Color picker checking WCAG contrast ratio against multiple backgrounds",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "webpack",
+    "test": "jest"
+  },
+  "author": "Hubert Kosiacki <hubert@kosiacki.com>",
+  "private": true,
+  "license": "MIT",
+  "dependencies": {
+    "prop-types": "^15.7.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
+    "@babel/preset-react": "^7.9.4",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^25.2.4",
+    "babel-loader": "^8.1.0",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.2",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-react": "^7.19.0",
+    "jest": "^25.2.4",
+    "prettier": "2.0.2",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  },
+  "peerDependencies": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ]
+  },
+  "eslintIgnore": [
+    "/dist/"
+  ],
+  "prettier": {
+    "arrowParens": "always",
+    "printWidth": 120,
+    "singleQuote": true,
+    "trailingComma": "none"
+  },
+  "jest": {
+    "setupFiles": [
+      "<rootDir>/enzyme.config.js"
+    ]
+  }
+}

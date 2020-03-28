@@ -1,0 +1,36 @@
+{
+  "env": {
+    "es6": true,
+    "browser": true
+  },
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 2019
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "rules": {
+    "eqeqeq": "error",
+    "no-else-return": "error",
+    "no-var": "error",
+    "one-var": [
+      "error",
+      { "uninitialized": "always", "initialized": "never" }
+    ],
+    "prefer-const": "error"
+  },
+  "overrides": [{
+    "files": ["src/**/*.test.js"],
+    "env": {
+      "jest": true
+    }
+  }, {
+    "files": ["webpack.config.js"],
+    "env": {
+      "node": true
+    }
+  }]
+}
