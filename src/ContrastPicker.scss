@@ -1,3 +1,6 @@
+$color-shadow: rgba(0, 0, 0, 0.5);
+$transition-fast: 0.2s ease;
+
 @mixin rainbow {
   background-image: linear-gradient(
     to right,
@@ -35,6 +38,23 @@
     position: relative;
     flex: 1;
     background-image: linear-gradient(to bottom, transparent, black), linear-gradient(to right, white, transparent);
+  }
+
+  &__handle {
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 2px $color-shadow, 0 0 1px $color-shadow inset;
+    transform: translate(-50%, -50%);
+    transition: width $transition-fast, height $transition-fast;
+    pointer-events: none;
+
+    &--dragging {
+      width: 2rem;
+      height: 2rem;
+    }
   }
 
   &__hue-slider {

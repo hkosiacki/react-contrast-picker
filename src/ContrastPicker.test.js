@@ -29,4 +29,31 @@ describe('ContrastPicker', function () {
 
     wrapper.unmount();
   });
+
+  it('should call onChange on hue change', function () {
+    const onChange = jest.fn();
+    const wrapper = mount(<ContrastPicker onChange={onChange} />);
+    const slider = wrapper.find('input[type="range"]').first();
+
+    slider.simulate('change', { target: { value: 180 } });
+    slider.simulate('change', { target: { value: 256 } });
+
+    expect(onChange.mock.calls).toHaveLength(2);
+
+    wrapper.unmount();
+  });
+
+  it('should call onChange on mouse drag', function () {
+    const onChange = jest.fn();
+    const wrapper = mount(<ContrastPicker onChange={onChange} />);
+    const area = wrapper.find('.rcp-picker__area').first();
+
+    area.simulate('mousedown', { button: 0 });
+    area.simulate('mousemove');
+    area.simulate('mouseup');
+
+    expect(onChange.mock.calls).toHaveLength(2);
+
+    wrapper.unmount();
+  });
 });
