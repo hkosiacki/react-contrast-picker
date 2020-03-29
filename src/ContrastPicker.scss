@@ -1,0 +1,73 @@
+@mixin rainbow {
+  background-image: linear-gradient(
+    to right,
+    hsl(0, 100%, 50%),
+    hsl(60, 100%, 50%),
+    hsl(120, 100%, 50%),
+    hsl(180, 100%, 50%),
+    hsl(240, 100%, 50%),
+    hsl(300, 100%, 50%),
+    hsl(360, 100%, 50%)
+  );
+}
+
+@mixin thumb {
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 1px solid #222222;
+  border-radius: 50%;
+  background-color: white;
+}
+
+.rcp-picker {
+  display: flex;
+  flex-flow: column nowrap;
+
+  &,
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  &__area {
+    overflow: hidden;
+    position: relative;
+    flex: 1;
+    background-image: linear-gradient(to bottom, transparent, black), linear-gradient(to right, white, transparent);
+  }
+
+  &__hue-slider {
+    -webkit-appearance: none;
+    height: 1rem;
+
+    &::-webkit-slider-runnable-track {
+      @include rainbow;
+      height: 0.5rem;
+    }
+
+    &::-webkit-slider-thumb {
+      @include thumb;
+      -webkit-appearance: none;
+      margin-top: -0.125rem;
+    }
+
+    &::-moz-range-track {
+      @include rainbow;
+      height: 0.5rem;
+    }
+
+    &::-moz-range-thumb {
+      @include thumb;
+    }
+
+    &::-ms-track {
+      @include rainbow;
+      height: 0.5rem;
+    }
+
+    &::-ms-thumb {
+      @include thumb;
+    }
+  }
+}
