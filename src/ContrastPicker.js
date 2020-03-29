@@ -5,7 +5,7 @@ import convert from 'color-convert';
 import './ContrastPicker.scss';
 
 const hex2hsv = (hex) => {
-  const [h, s, v] = convert.hex.hsv(hex);
+  const [h, s, v] = convert.hex.hsv.raw(hex).map((v) => Math.round(v * 10) / 10);
   return { h, s, v };
 };
 
@@ -30,6 +30,7 @@ class ContrastPicker extends Component {
     this.handleMouseDown = this.handleMouseDown.bind(this);
     this.handleMouseUp = this.handleMouseUp.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleHueChange = this.handleHueChange.bind(this);
   }
 
@@ -52,34 +53,56 @@ class ContrastPicker extends Component {
       return;
     }
 
-    const newColor = {
+    const color = {
       ...this.state.color,
       s: clamp(round(event.nativeEvent.offsetX / event.target.clientWidth)),
       v: 100 - clamp(round(event.nativeEvent.offsetY / event.target.clientHeight))
     };
 
     if (this.props.onChange) {
-      this.props.onChange(hsv2hex(newColor));
+      this.props.onChange(hsv2hex(color));
     }
 
-    this.setState({
-      color: newColor
-    });
+    this.setState({ color });
+  }
+
+  handleKeyDown(event) {
+    const color = { ...this.state.color };
+    switch (event.key) {
+      case 'ArrowLeft':
+        color.s = Math.max(0, color.s - 1);
+        break;
+      case 'ArrowRight':
+        color.s = Math.min(100, color.s + 1);
+        break;
+      case 'ArrowDown':
+        color.v = Math.max(0, color.v - 1);
+        break;
+      case 'ArrowUp':
+        color.v = Math.min(100, color.v + 1);
+        break;
+      default:
+        return;
+    }
+
+    if (this.props.onChange) {
+      this.props.onChange(hsv2hex(color));
+    }
+
+    this.setState({ color });
   }
 
   handleHueChange(event) {
-    const newColor = {
+    const color = {
       ...this.state.color,
       h: event.target.value
     };
 
     if (this.props.onChange) {
-      this.props.onChange(hsv2hex(newColor));
+      this.props.onChange(hsv2hex(color));
     }
 
-    this.setState({
-      color: newColor
-    });
+    this.setState({ color });
   }
 
   render() {
@@ -97,11 +120,14 @@ class ContrastPicker extends Component {
         >
           <div
             className={`rcp-picker__handle ${dragging ? 'rcp-picker__handle--dragging' : ''}`}
+            tabIndex="0"
             style={{
               top: 100 - color.v + '%',
               left: color.s + '%',
-              backgroundColor: hsv2hex(color)
+              backgroundColor: hsv2hex(color),
+              color: hsv2hex({ h: 0, s: 0, v: color.v < 80 ? 100 : 0 })
             }}
+            onKeyDown={this.handleKeyDown}
           />
         </div>
         <input

@@ -51,9 +51,14 @@ $transition-fast: 0.2s ease;
     transition: width $transition-fast, height $transition-fast;
     pointer-events: none;
 
-    &--dragging {
+    &--dragging, &:focus {
       width: 2rem;
       height: 2rem;
+    }
+
+    &:focus {
+      outline: 2px dotted currentcolor;
+      outline-offset: 0.5rem;
     }
   }
 

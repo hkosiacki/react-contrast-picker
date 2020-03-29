@@ -56,4 +56,25 @@ describe('ContrastPicker', function () {
 
     wrapper.unmount();
   });
+
+  it('should call onChange on arrow key down', function () {
+    const initialColor = '#abcdef';
+    const onChange = jest.fn();
+    const wrapper = mount(<ContrastPicker initialColor={initialColor} onChange={onChange} />);
+    const handle = wrapper.find('.rcp-picker__handle').first();
+
+    handle.simulate('keydown', { key: 'ArrowLeft' });
+    handle.simulate('keydown', { key: 'ArrowDown' });
+    handle.simulate('keydown', { key: 'ArrowRight' });
+    handle.simulate('keydown', { key: 'ArrowUp' });
+
+    expect(onChange.mock.calls).toHaveLength(4);
+    for (let i = 1; i < 4; ++i) {
+      expect(onChange.mock.calls[i][0]).not.toEqual(onChange.mock.calls[i - 1][0]);
+    }
+
+    expect(onChange.mock.calls[3][0].toLowerCase()).toEqual(initialColor);
+
+    wrapper.unmount();
+  });
 });
