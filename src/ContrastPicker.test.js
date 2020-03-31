@@ -77,4 +77,16 @@ describe('ContrastPicker', function () {
 
     wrapper.unmount();
   });
+
+  it('should generate contrast curves for given colors', function () {
+    const compareWith = ['#000000', '#c0ffee', '#314159'];
+    const wrapper = mount(<ContrastPicker compareWith={compareWith} ratio={4.5} />);
+    const curves = wrapper.find('path');
+
+    expect(curves).toHaveLength(3);
+    expect(curves.first().prop('d')).not.toEqual(curves.at(1).prop('d'));
+    expect(curves.first().prop('d')).not.toEqual(curves.at(2).prop('d'));
+
+    wrapper.unmount();
+  });
 });

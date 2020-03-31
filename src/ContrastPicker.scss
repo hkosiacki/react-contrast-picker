@@ -1,7 +1,9 @@
 $color-shadow: rgba(0, 0, 0, 0.5);
 $transition-fast: 0.2s ease;
 
-@mixin rainbow {
+@mixin slider {
+  height: 0.5rem;
+  border-radius: 1rem;
   background-image: linear-gradient(
     to right,
     hsl(0, 100%, 50%),
@@ -40,6 +42,18 @@ $transition-fast: 0.2s ease;
     background-image: linear-gradient(to bottom, transparent, black), linear-gradient(to right, white, transparent);
   }
 
+  &__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: white;
+    stroke-width: 0.5px;
+    pointer-events: none;
+  }
+
   &__handle {
     position: absolute;
     width: 1rem;
@@ -65,10 +79,10 @@ $transition-fast: 0.2s ease;
   &__hue-slider {
     -webkit-appearance: none;
     height: 1rem;
+    margin-top: 0.5rem;
 
     &::-webkit-slider-runnable-track {
-      @include rainbow;
-      height: 0.5rem;
+      @include slider;
     }
 
     &::-webkit-slider-thumb {
@@ -78,8 +92,7 @@ $transition-fast: 0.2s ease;
     }
 
     &::-moz-range-track {
-      @include rainbow;
-      height: 0.5rem;
+      @include slider;
     }
 
     &::-moz-range-thumb {
@@ -87,8 +100,7 @@ $transition-fast: 0.2s ease;
     }
 
     &::-ms-track {
-      @include rainbow;
-      height: 0.5rem;
+      @include slider;
     }
 
     &::-ms-thumb {

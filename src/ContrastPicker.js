@@ -1,20 +1,18 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import convert from 'color-convert';
+import throttle from 'lodash.throttle';
+
+import {
+  clampPercent,
+  roundPercent,
+  hex2hsv,
+  hsv2hex,
+  relativeLuminance,
+  getLuminanceFromRatio,
+  generateSVGPath
+} from './utils';
 
 import './ContrastPicker.scss';
-
-const hex2hsv = (hex) => {
-  const [h, s, v] = convert.hex.hsv.raw(hex).map((v) => Math.round(v * 10) / 10);
-  return { h, s, v };
-};
-
-const hsv2hex = ({ h, s, v }) => {
-  return '#' + convert.hsv.hex([h, s, v]);
-};
-
-const round = (v) => Math.round(v * 1000) / 10;
-const clamp = (v) => Math.max(0, Math.min(v, 100));
 
 class ContrastPicker extends Component {
   constructor(props) {
@@ -24,6 +22,7 @@ class ContrastPicker extends Component {
 
     this.state = {
       color: hex2hsv(initialColor),
+      contrastCurves: [],
       dragging: false
     };
 
@@ -32,6 +31,12 @@ class ContrastPicker extends Component {
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleHueChange = this.handleHueChange.bind(this);
+
+    this.updateContrastCurvesThrottled = throttle(this.updateContrastCurves, 100).bind(this);
+  }
+
+  componentDidMount() {
+    this.updateContrastCurvesThrottled();
   }
 
   handleMouseDown(event) {
@@ -55,15 +60,11 @@ class ContrastPicker extends Component {
 
     const color = {
       ...this.state.color,
-      s: clamp(round(event.nativeEvent.offsetX / event.target.clientWidth)),
-      v: 100 - clamp(round(event.nativeEvent.offsetY / event.target.clientHeight))
+      s: clampPercent(roundPercent(event.nativeEvent.offsetX / event.target.clientWidth)),
+      v: 100 - clampPercent(roundPercent(event.nativeEvent.offsetY / event.target.clientHeight))
     };
 
-    if (this.props.onChange) {
-      this.props.onChange(hsv2hex(color));
-    }
-
-    this.setState({ color });
+    this.updateColor(color);
   }
 
   handleKeyDown(event) {
@@ -85,11 +86,7 @@ class ContrastPicker extends Component {
         return;
     }
 
-    if (this.props.onChange) {
-      this.props.onChange(hsv2hex(color));
-    }
-
-    this.setState({ color });
+    this.updateColor(color);
   }
 
   handleHueChange(event) {
@@ -98,6 +95,12 @@ class ContrastPicker extends Component {
       h: event.target.value
     };
 
+    this.updateColor(color);
+
+    this.updateContrastCurvesThrottled();
+  }
+
+  updateColor(color) {
     if (this.props.onChange) {
       this.props.onChange(hsv2hex(color));
     }
@@ -105,9 +108,61 @@ class ContrastPicker extends Component {
     this.setState({ color });
   }
 
+  updateContrastCurves() {
+    const { compareWith, ratio } = this.props;
+
+    if (!Array.isArray(compareWith) || !Number.isFinite(ratio)) {
+      return;
+    }
+
+    const epsilon = 0.001;
+    const { h } = this.state.color;
+    const curves = [];
+
+    for (const otherColor of compareWith) {
+      const curve = [];
+      const otherColorLuminance = relativeLuminance(hex2hsv(otherColor));
+      const desiredLuminance = getLuminanceFromRatio(ratio, otherColorLuminance);
+      if (desiredLuminance === undefined) {
+        continue;
+      }
+
+      for (let s = 0; s <= 100; ++s) {
+        let v = 0;
+        let multiplier = 100;
+        let deltaLuminance = desiredLuminance - relativeLuminance({ h, s, v });
+        let previousSign = Math.sign(deltaLuminance);
+
+        for (let i = 0; i < 50; ++i) {
+          if (Math.abs(deltaLuminance) < epsilon) {
+            curve.push([s, 100 - v]);
+            break;
+          }
+
+          const sign = Math.sign(deltaLuminance);
+          if (sign !== previousSign) {
+            multiplier /= 2;
+            previousSign = sign;
+          } else if (v < 0 || v > 100) {
+            curve.push([s, null]);
+            break;
+          }
+
+          v += multiplier * deltaLuminance;
+          deltaLuminance = desiredLuminance - relativeLuminance({ h, s, v: clampPercent(v) });
+        }
+      }
+
+      curves.push(generateSVGPath(curve));
+    }
+
+    this.setState({ contrastCurves: curves });
+  }
+
   render() {
-    const { height } = this.props;
-    const { color, dragging } = this.state;
+    const { height, compareWith = [] } = this.props;
+    const { color, contrastCurves, dragging } = this.state;
+    const drawCurves = compareWith.length && contrastCurves.length === compareWith.length;
 
     return (
       <div className="rcp-picker" style={{ height }}>
@@ -118,6 +173,13 @@ class ContrastPicker extends Component {
           onMouseUp={this.handleMouseUp}
           onMouseMove={this.handleMouseMove}
         >
+          {drawCurves && (
+            <svg className="rcp-picker__overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
+              {compareWith.map((otherColor, idx) => (
+                <path key={otherColor} d={contrastCurves[idx]} />
+              ))}
+            </svg>
+          )}
           <div
             className={`rcp-picker__handle ${dragging ? 'rcp-picker__handle--dragging' : ''}`}
             tabIndex="0"
@@ -145,13 +207,16 @@ class ContrastPicker extends Component {
 }
 
 ContrastPicker.propTypes = {
+  compareWith: PropTypes.arrayOf(PropTypes.string),
   height: PropTypes.string,
   initialColor: PropTypes.string,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  ratio: PropTypes.number
 };
 
 ContrastPicker.defaultProps = {
-  initialColor: '#5f7f3f'
+  initialColor: '#5f7f3f',
+  ratio: 4.5
 };
 
 export default ContrastPicker;
