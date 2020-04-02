@@ -176,7 +176,7 @@ class ContrastPicker extends Component {
           {drawCurves && (
             <svg className="rcp-picker__overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
               {compareWith.map((otherColor, idx) => (
-                <path key={otherColor} d={contrastCurves[idx]} />
+                <path key={otherColor} d={contrastCurves[idx]} vectorEffect="non-scaling-stroke" />
               ))}
             </svg>
           )}
